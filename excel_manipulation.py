@@ -16,4 +16,3 @@ def get_filepath(app, label):
     if (app.filepath):
         label.config(text = basename(normpath(app.filepath)))
         print(app.filepath)
-
