@@ -50,20 +50,44 @@ def extract_email_lst(app):
 
     return email_lst
     #TODO: allow user to select correct email column if multiple available
-        
 
-    
-def filter_emails(email_lst, filter_list, exclude):
-    """ Separates an email list into two lists of approved and rejected emails.
+
+def filter_emails(filter_lst, email_lst, exclude):
+    """ Separates an email list into approved and rejected email lists.
 
         Args:
             email_lst: List of all emails to be analyzed.
             filter_lst: List of terms to be filtered in or out of approval list.
             exclude: Bolean to indicate whether the filter list approves or excludes an email string.
         Returns:
-            approved_lst: Emails that passed the filter.
-            rejected_lst: Emails to be excluded.
+            approved_ems: Emails that passed the filter.
+            rejected_ems: Emails to be excluded.
         
     """
+    approved_ems = []
+    rejected_ems = []
+
+    for email in email_lst:
+        #Check if email matches any filter words
+        in_filter = False
+        for filter_i in filter_lst:
+            in_filter = filter_i.lower() in email.lower()
+            print(filter_i.lower(), email.lower(), in_filter)
+            
+        if in_filter == exclude:
+            rejected_ems.append(email)
+        elif in_filter != exclude:
+            approved_ems.append(email)
+    
+    return approved_ems, rejected_ems
+
+
+
+        
+        
+        
+                    
+        
+        
 
     
