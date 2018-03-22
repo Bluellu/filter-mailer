@@ -1,8 +1,9 @@
 # Excel manipulation functions
-from tkinter import *
+import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from os.path import normpath, basename
-import xlrd
+#import xlrd
+import pandas as pd
 import re
 
 
@@ -38,14 +39,18 @@ def extract_email_lst(app):
             A single list of email strings.
             
     """
-    xl_workbook = xlrd.open_workbook(app.filepath)
+    df = pd.read_excel(app.filepath)
+    email_lst = []
+    
+    col_name = 'E-Mail'
 
-    # Assume input workbook has a single sheet #(TODO: Allow for multi-sheet files)    
-    xl_sheet = xl_workbook.sheet_by_index(0)
-    print ('Sheet: %s' % xl_sheet.name) #TEST
+    if col_name in df.columns.values:
+        email_lst = df['E-Mail'].values #TODO: Allow different spellings with regex
+        print(email_lst, len(email_lst)) #TEST
 
-    #TODO: extract email list from column (use regular expression to check column name)
-    #TODO: Add support for .xls type
+    return email_lst
+    #TODO: allow user to select correct email column if multiple available
+        
 
     
 def filter_emails(email_lst, filter_list, exclude):
