@@ -28,14 +28,22 @@ class MainApp:
                         bg = "navy",
                         command = (lambda: em.get_filepath(self, file_lbl)))
 
+        #Text input widgets for filter words
+        include_box = tk.Text(self.frame)
+        exclude_box = tk.Text(self.frame)    
+
         #Add items to grid
         title_lbl.grid(column = 0, row = 0, columnspan = 3, sticky = "nsew")
         import_bttn.grid(column = 0, row = 1, padx = 10, sticky = "nsew")
         file_lbl.grid(column = 1, row = 1, columnspan = 2, sticky = "w")
+
+        include_box.grid(column = 1, row = 2, columnspan = 1, rowspan = 2, sticky = "nsew")
+        exclude_box.grid(column = 2, row = 2, columnspan = 1, rowspan = 2, sticky = "nsew")     
         
         #Adjust column and row expansion
         self.frame.grid_rowconfigure(2, weight = 2)
         self.frame.grid_columnconfigure(2, weight = 2)
+
         
 
 if __name__ == "__main__":
