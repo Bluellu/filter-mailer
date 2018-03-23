@@ -52,13 +52,25 @@ def extract_email_lst(app):
     #TODO: allow user to select correct email column if multiple available
 
 
-def filter_emails(filter_lst, email_lst, exclude):
+def contains_term(email, terms):
+    """ Returns a boolean indicating whether an email contains any of the given
+        sub-terms. Helper for filter_emails.
+
+    """
+    contains = False
+    for term in terms:
+        if term.lower() in email.lower():
+            contains = True
+            break
+    return contains
+
+def filter_emails(email_lst, include_lst, exclude_lst):
     """ Separates an email list into approved and rejected email lists.
 
         Args:
             email_lst: List of all emails to be analyzed.
-            filter_lst: List of terms to be filtered in or out of approval list.
-            exclude: Bolean to indicate whether the filter list approves or excludes an email string.
+            include_lst: List of terms to be included. If empty, all items match.
+            exclude_lst: List of terms to be filtered out.
         Returns:
             approved_ems: Emails that passed the filter.
             rejected_ems: Emails to be excluded.
@@ -68,18 +80,18 @@ def filter_emails(filter_lst, email_lst, exclude):
     rejected_ems = []
 
     for email in email_lst:
-        #Check if email matches any filter words
-        in_filter = False
-        for filter_i in filter_lst:
-            in_filter = filter_i.lower() in email.lower()
-            print(filter_i.lower(), email.lower(), in_filter)
-            
-        if in_filter == exclude:
-            rejected_ems.append(email)
-        elif in_filter != exclude:
+        in_approve = (not include_lst) or contains_term(email, include_lst)
+        in_exclude = contains_term(email, exclude_lst)
+
+        if in_approve and (not in_exclude):
             approved_ems.append(email)
+        else:
+            rejected_ems.append(email)
+
+    #print (approved_ems, rejected_ems)
     
     return approved_ems, rejected_ems
+
 
 
 
