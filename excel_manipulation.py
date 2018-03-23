@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from os.path import normpath, basename
-#import xlrd
+from collections import OrderedDict
 import pandas as pd
 import re
 
@@ -46,9 +46,13 @@ def extract_email_lst(app):
 
     if col_name in df.columns.values:
         email_lst = df['E-Mail'].values #TODO: Allow different spellings with regex
-        print(email_lst, len(email_lst)) #TEST
 
-    return email_lst
+    # Remove duplicates 
+    ordered_email_lst = list(OrderedDict.fromkeys(email_lst))
+    print(ordered_email_lst, len(ordered_email_lst)) #TEST
+    
+    return ordered_email_lst
+
     #TODO: allow user to select correct email column if multiple available
 
 
@@ -87,8 +91,6 @@ def filter_emails(email_lst, include_lst, exclude_lst):
             approved_ems.append(email)
         else:
             rejected_ems.append(email)
-
-    #print (approved_ems, rejected_ems)
     
     return approved_ems, rejected_ems
 
