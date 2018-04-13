@@ -1,34 +1,6 @@
 # Excel manipulation functions
-import tkinter as tk
-from tkinter.filedialog import askopenfilename
-from os.path import normpath, basename
 from collections import OrderedDict
-import pandas as pd
-import re
-
-
-def get_filepath(app, label):
-    """ Sets the app's filepath to a chosen file and
-        updates the GUI label to display the chosen file's name.
-
-        Args:
-            app: App instance containing the filepath argument to be set.
-            label: GUI label to be updated to display the new file's name.            
-        
-    """
-    app.filepath = askopenfilename(initialdir = "C:/",
-                                title = "import file",
-                                filetypes =
-                                [('Excel', ('*.xls', '*.xlsx')),
-                                ('CSV', '*.csv',)])
-    
-    # Update displayed file name
-    if (app.filepath):
-        label.config(text = basename(normpath(app.filepath)))
-        print(app.filepath)
-
-        extract_email_lst(app) #TEST
-        
+import pandas as pd     
         
 def extract_email_lst(app):
     """ Extracts and returns a list of emails from an excel file column.
@@ -39,18 +11,18 @@ def extract_email_lst(app):
             A single list of email strings.
             
     """
-    df = pd.read_excel(app.filepath)
-    email_lst = []
-    
-    col_name = 'E-Mail'
+    ordered_email_lst = []
+    if (app.filepath):
+        col_name = 'E-Mail'
+        
+        df = pd.read_excel(app.filepath)
+     
+        if col_name in df.columns.values:
+            email_lst = df[df[col_name].notnull()][col_name].values #TODO: Allow different spellings with regex
 
-    if col_name in df.columns.values:
-        email_lst = df['E-Mail'].values #TODO: Allow different spellings with regex
-
-    # Remove duplicates 
-    ordered_email_lst = list(OrderedDict.fromkeys(email_lst))
-    print(ordered_email_lst, len(ordered_email_lst)) #TEST
-    
+            #Remove duplicates
+            ordered_email_lst = list(OrderedDict.fromkeys(email_lst))
+        
     return ordered_email_lst
 
     #TODO: allow user to select correct email column if multiple available
@@ -62,10 +34,12 @@ def contains_term(email, terms):
 
     """
     contains = False
-    for term in terms:
-        if term.lower() in email.lower():
-            contains = True
-            break
+    if isinstance(email,(str,)):
+        for term in terms:
+            if isinstance(term,(str,)):
+                if term.lower() in email.lower():
+                    contains = True
+                    break
     return contains
 
 def filter_emails(email_lst, include_lst, exclude_lst):
@@ -93,6 +67,40 @@ def filter_emails(email_lst, include_lst, exclude_lst):
             rejected_ems.append(email)
     
     return approved_ems, rejected_ems
+
+
+def process_list(string):
+    """ Create list from string with items separated by commas. """
+    #Remove all spaces
+    no_spaces = "".join(string.split())
+
+    #Split at commas
+    split_lst = no_spaces.split(",")
+
+    #Remove empty strings and return
+    return list(filter(None, split_lst))
+    
+def get_sorted_emails(app):
+    """ Get approved and rejected email lists from current app state. """
+    emails = []
+    include = []
+    exclude = []
+    
+    if (app.filepath):
+        emails = extract_email_lst(app)
+
+    #Obtain filter lists from text boxes
+    include = process_list(app.include_box.get("1.0", 'end-1c'))
+    exclude = process_list(app.exclude_box.get("1.0", 'end-1c'))
+
+    print('EMAILS/////////////////////')
+    print(emails)
+    print('INCLUDE////////////////////')
+    print(include)
+    print('EXCLUDE////////////////////')
+    print(exclude)
+
+    return filter_emails(emails, include, exclude)
 
 
 
