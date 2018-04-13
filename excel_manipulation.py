@@ -93,12 +93,12 @@ def get_sorted_emails(app):
     include = process_list(app.include_box.get("1.0", 'end-1c'))
     exclude = process_list(app.exclude_box.get("1.0", 'end-1c'))
 
-    print('EMAILS/////////////////////')
-    print(emails)
-    print('INCLUDE////////////////////')
-    print(include)
-    print('EXCLUDE////////////////////')
-    print(exclude)
+##    print('EMAILS/////////////////////')
+##    print(emails)
+##    print('INCLUDE////////////////////')
+##    print(include)
+##    print('EXCLUDE////////////////////')
+##    print(exclude)
 
     return filter_emails(emails, include, exclude)
 
