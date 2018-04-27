@@ -17,8 +17,11 @@ class MainApp:
     def __init__(self, parent):
         self.root = parent
         self.frame = tk.Frame(self.root)
-        self.frame.pack(fill = 'both', expand = 1)
         self.filepath = ""
+
+        self.frame.pack(fill = 'both', expand = 1)
+        self.frame.update()
+        uop.center_window(self.root)
 
         #Styling parameters
         box_width = 26
@@ -79,7 +82,7 @@ class MainApp:
         self.frame.grid_columnconfigure(1, weight = 2)
         self.frame.grid_columnconfigure(2, weight = 2)
         self.frame.grid_columnconfigure(3, weight = 1)
-        
+
 
 if __name__ == "__main__":
     main()

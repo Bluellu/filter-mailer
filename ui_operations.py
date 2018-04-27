@@ -6,8 +6,22 @@ import tkinter.scrolledtext as tkscrolled
 import excel_manipulation as em
 #import mailing as ml
 
-'''Functions that modify and create UI elements. '''
+'''Functions to modify and create UI elements. '''
 
+def center_window(window):
+    ''' Center window within the screen. '''
+    
+    screen_h = window.winfo_screenheight()
+    screen_w = window.winfo_screenwidth()
+    win_h = window.winfo_height()
+    win_w = window.winfo_width()
+
+    x = (screen_w / 2) - (win_w / 2)
+    y = (screen_h / 2) - (win_h / 2)
+
+    window.geometry('%dx%d+%d+%d' % (win_w, win_h, x, y))
+
+    
 def get_filepath(app, label):
     """ Set the app's filepath to a chosen file and
         update the GUI label to display the chosen file's name.
@@ -57,11 +71,15 @@ def filter_preview(app):
         warning = tk.Label(prvw, text = "No File Selected")
         warning.grid()
 
+
 def login_and_send(ec, subj_box, msg_box, recipients):
+    ''' Construct login window. '''
+    
     ls = tk.Toplevel(ec, bd = 15)
     ls.wm_title("Log in")
     ls.geometry("300x200")
-    
+    ls.update()
+    center_window(ls)    
     ls.grab_set()
 
     #Server input
@@ -101,17 +119,19 @@ def login_and_send(ec, subj_box, msg_box, recipients):
     email_box.grid(column = 1, row = 3, padx = 10, pady = 5, sticky = "nsew")
     pw_box.grid(column = 1, row = 4, padx = 10, pady = 5, sticky = "nsew")
 
-    send_bttn.grid(column = 0, row = 5, columnspan = 2, padx = 20, pady = 10, sticky = "ns")
-    
-    
+    send_bttn.grid(column = 0, row = 5, columnspan = 2, padx = 20, pady = 10, sticky = "ns")    
 
     #ml.mass_send(#TODO user, pw, server_addr, port, recipients)
 
+
 def email_creation(app):
+    ''' Construct email-creation window. '''
+    
     ec = tk.Toplevel(app.frame, bd = 15)
     ec.wm_title("Email Creation")
-    ec.geometry("450x400")
-    
+    ec.geometry("450x400")    
+    ec.update()
+    center_window(ec)    
     ec.grab_set()
 
     recipients = em.get_sorted_emails(app)[0] #Approved emails
