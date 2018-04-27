@@ -4,6 +4,8 @@ from os.path import normpath, basename
 import excel_manipulation as em
 import tkinter.scrolledtext as tkscrolled
 
+'''Functions that modify and create UI elements. '''
+
 def get_filepath(app, label):
     """ Set the app's filepath to a chosen file and
         update the GUI label to display the chosen file's name.
@@ -43,10 +45,10 @@ def filter_preview(app):
     if (app.filepath):
         filtered_emails = em.get_sorted_emails(app)
 
-        accepted_lst = create_list_wgt(prvw, filtered_emails[0], 15, 20)
+        accepted_lst = create_list_wgt(prvw, filtered_emails[0], 20, 20)
         accepted_lst.grid(column = 0, row = 1)
 
-        rejected_lst = create_list_wgt(prvw, filtered_emails[1], 15, 20)
+        rejected_lst = create_list_wgt(prvw, filtered_emails[1], 20, 20)
         rejected_lst.grid(column = 1, row = 1)         
     
     else:
@@ -68,7 +70,7 @@ def email_creation(app):
 
     #Message
     msg_lbl = tk.Label(ec, text = "Message")
-    msg_box = tkscrolled.ScrolledText(ec, width = 26, height = 5)
+    msg_box = tkscrolled.ScrolledText(ec, height = 10)
 
     #Image attachment
     img_bttn = tk.Button(ec, text = "Attach Image", width = 0,
@@ -82,16 +84,21 @@ def email_creation(app):
     recip_box = create_list_wgt(ec, recipients, 20, 15)
     
     #Add items to grid
-    recip_lbl.grid(column = 3, row = 0, sticky = "nsew")
-    recip_box.grid(column = 3, row = 1, rowspan = 4, sticky = "e")
+    recip_lbl.grid(column = 1, row = 0, sticky = "nsew")
+    recip_box.grid(column = 1, row = 1, rowspan = 4, sticky = "nsew")
 
     subj_lbl.grid(column = 0, row = 0, padx = 10, sticky = "w")
-    subj_box.grid(column = 0, row = 1, padx = 10, sticky = "ew")
+    subj_box.grid(column = 0, row = 1, padx = (10, 25), sticky = "ew")
 
     msg_lbl.grid(column = 0, row = 2, padx = 10, sticky = "w")
     msg_box.grid(column = 0, row = 3, padx = 10, sticky = "nsew")
 
     img_bttn.grid(column = 0, row = 4, padx = 10, pady = 10, sticky = "w")
+
+    ec.columnconfigure(0, weight = 1)
+    ec.rowconfigure(3, weight = 1)
+
+
 
 
     

@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import tkinter.scrolledtext as tkscrolled
 import ui_operations as uop
 
@@ -31,6 +32,9 @@ class MainApp:
         #Label for selected file
         file_lbl = tk.Label(self.frame, text = "None selected ")
 
+        #Separator line between file-choosing and filtering items
+        sep = ttk.Separator(self.frame, orient = "horizontal")
+
         #Filter keyword boxes
         filter_lbl = tk.Label(self.frame, text = "Filter keywords (separate with commas): ")
         
@@ -53,9 +57,9 @@ class MainApp:
                         command = (lambda: uop.email_creation(self)))        
 
         #Add items to grid
-        import_bttn.grid(column = 0, row = 0, columnspan = 1, padx = 5, pady = 15, sticky = "new")
-        
+        import_bttn.grid(column = 0, row = 0, columnspan = 1, padx = 5, pady = 15, sticky = "new")        
         file_lbl.grid(column = 1, row = 0, columnspan = 3, sticky = "w")
+        sep.grid(column = 0, row = 1, columnspan = 4, sticky = "nsew")
 
         filter_lbl.grid(column = 0, row = 1, columnspan = 2, padx = 5, sticky = "w")
 
@@ -75,7 +79,6 @@ class MainApp:
         self.frame.grid_columnconfigure(1, weight = 2)
         self.frame.grid_columnconfigure(2, weight = 2)
         self.frame.grid_columnconfigure(3, weight = 1)
-
         
 
 if __name__ == "__main__":

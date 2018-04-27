@@ -3,7 +3,7 @@ from collections import OrderedDict
 import pandas as pd     
         
 def extract_email_lst(app):
-    """ Extracts and returns a list of emails from an excel file column.
+    """ Extract and return a list of emails from an excel file column.
 
         Args:
             app: The app instance containing the desired excel filepath.
@@ -29,7 +29,7 @@ def extract_email_lst(app):
 
 
 def contains_term(email, terms):
-    """ Returns a boolean indicating whether an email contains any of the given
+    """ Return a boolean indicating whether an email contains any of the given
         sub-terms. Helper for filter_emails.
 
     """
@@ -43,7 +43,7 @@ def contains_term(email, terms):
     return contains
 
 def filter_emails(email_lst, include_lst, exclude_lst):
-    """ Separates an email list into approved and rejected email lists.
+    """ Separate an email list into approved and rejected email lists.
 
         Args:
             email_lst: List of all emails to be analyzed.
