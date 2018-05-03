@@ -4,9 +4,9 @@ from tkinter import ttk
 from os.path import normpath, basename
 import tkinter.scrolledtext as tkscrolled
 import excel_manipulation as em
-#import mailing as ml
+import mailing as ml
 
-'''Functions to modify and create UI elements. '''
+'''Functions that modify and create UI elements. '''
 
 def center_window(window):
     ''' Center window within the screen. '''
@@ -40,7 +40,6 @@ def get_filepath(app, label):
     # Update displayed file name
     if (app.filepath):
         label.config(text = basename(normpath(app.filepath)))
-        #print(app.filepath)
 
 
 def create_list_wgt(app, txt_list, x, y):
@@ -70,59 +69,7 @@ def filter_preview(app):
     else:
         warning = tk.Label(prvw, text = "No File Selected")
         warning.grid()
-
-
-def login_and_send(ec, subj_box, msg_box, recipients):
-    ''' Construct login window. '''
-    
-    ls = tk.Toplevel(ec, bd = 15)
-    ls.wm_title("Log in")
-    ls.geometry("300x200")
-    ls.update()
-    center_window(ls)    
-    ls.grab_set()
-
-    #Server input
-    server_lbl = tk.Label(ls, text = "Server: ")
-    server_box = tk.Entry(ls)
-
-    #Port input
-    port_lbl = tk.Label(ls, text = "Port: ")
-    port_box = tk.Entry(ls)
-
-    #User email input
-    email_lbl = tk.Label(ls, text = "Email: ")
-    email_box = tk.Entry(ls)
-
-    #Password input
-    pw_lbl = tk.Label(ls, text = "Password: ")
-    pw_box = tk.Entry(ls, show = "*")
-
-    #Send button
-    send_bttn = tk.Button(ls, text = "Send emails", width = 30,
-                        fg = "white",
-                        bg = "navy",
-                        #command = (lambda: login_and_send(ec, subj_box, msg_box, recipients))
-                        )
-
-    sep = ttk.Separator(ls, orient = "horizontal")
-    
-    server_lbl.grid(column = 0, row = 0, padx = 10, pady = 5, sticky = "w")
-    port_lbl.grid(column = 0, row = 1, padx = 10, pady = 5, sticky = "w")
-    email_lbl.grid(column = 0, row = 3, padx = 10, pady = 5, sticky = "w")
-    pw_lbl.grid(column = 0, row = 4, padx = 10, pady = 5, sticky = "w")
-
-    sep.grid(column = 0, row = 2, columnspan = 2, sticky = "nsew")
-
-    server_box.grid(column = 1, row = 0, padx = 10, pady = 5, sticky = "nsew")
-    port_box.grid(column = 1, row = 1, padx = 10, pady = 5, sticky = "nsew")
-    email_box.grid(column = 1, row = 3, padx = 10, pady = 5, sticky = "nsew")
-    pw_box.grid(column = 1, row = 4, padx = 10, pady = 5, sticky = "nsew")
-
-    send_bttn.grid(column = 0, row = 5, columnspan = 2, padx = 20, pady = 10, sticky = "ns")    
-
-    #ml.mass_send(#TODO user, pw, server_addr, port, recipients)
-
+        
 
 def email_creation(app):
     ''' Construct email-creation window. '''
@@ -154,7 +101,9 @@ def email_creation(app):
     login_bttn = tk.Button(ec, text = "Log in and send emails", width = 70,
                         fg = "white",
                         bg = "navy",
-                        command = (lambda: login_and_send(ec, subj_box, msg_box, recipients))
+                        command = (lambda: login_and_send(ec, subj_box.get(),
+                                                              msg_box.get("1.0", 'end-1c'),
+                                                              recipients))
                         )
 
     #Sender box
@@ -176,6 +125,62 @@ def email_creation(app):
 
     ec.columnconfigure(0, weight = 1)
     ec.rowconfigure(3, weight = 1)
+    
+
+def login_and_send(ec, subj, msg, recipients):
+    ''' Construct login window. Child of email-creation window. '''
+    
+    ls = tk.Toplevel(ec, bd = 15)
+    ls.wm_title("Log in")
+    ls.geometry("300x200")
+    ls.update()
+    center_window(ls)    
+    ls.grab_set()
+
+    #Server input
+    server_lbl = tk.Label(ls, text = "Server: ")
+    server_box = tk.Entry(ls)
+
+    #Port input
+    port_lbl = tk.Label(ls, text = "Port: ")
+    port_box = tk.Entry(ls)
+
+    #User email input
+    email_lbl = tk.Label(ls, text = "Email: ")
+    email_box = tk.Entry(ls)
+
+    #Password input
+    pw_lbl = tk.Label(ls, text = "Password: ")
+    pw_box = tk.Entry(ls, show = "*")
+
+    #Send button
+    send_bttn = tk.Button(ls, text = "Send emails", width = 30,
+                        fg = "white",
+                        bg = "navy",
+                        command = (lambda: ml.mass_mail(subj,
+                                                        msg,
+                                                        email_box.get(),
+                                                        pw_box.get(),
+                                                        server_box.get(),
+                                                        port_box.get(),
+                                                        recipients)))
+
+    sep = ttk.Separator(ls, orient = "horizontal")
+    
+    server_lbl.grid(column = 0, row = 0, padx = 10, pady = 5, sticky = "w")
+    port_lbl.grid(column = 0, row = 1, padx = 10, pady = 5, sticky = "w")
+    email_lbl.grid(column = 0, row = 3, padx = 10, pady = 5, sticky = "w")
+    pw_lbl.grid(column = 0, row = 4, padx = 10, pady = 5, sticky = "w")
+
+    sep.grid(column = 0, row = 2, columnspan = 2, sticky = "nsew")
+
+    server_box.grid(column = 1, row = 0, padx = 10, pady = 5, sticky = "nsew")
+    port_box.grid(column = 1, row = 1, padx = 10, pady = 5, sticky = "nsew")
+    email_box.grid(column = 1, row = 3, padx = 10, pady = 5, sticky = "nsew")
+    pw_box.grid(column = 1, row = 4, padx = 10, pady = 5, sticky = "nsew")
+
+    send_bttn.grid(column = 0, row = 5, columnspan = 2, padx = 20, pady = 10, sticky = "ns")
+
 
     
 
