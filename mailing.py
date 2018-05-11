@@ -49,7 +49,7 @@ def connect_server(user, pw, server_addr, port):
             return None
     
 
-def mass_mail(subj, message, user, pw, server_addr, port, recipients):
+def mail_all(subj, message, user, pw, server_addr, port, recipients):
     '''Send identical emails to every contact in the recipient list. '''
 
     #Build general email body
@@ -64,8 +64,6 @@ def mass_mail(subj, message, user, pw, server_addr, port, recipients):
     #Send emails
     try:
         if server is not None:
-            #ems = [] #TEST
-            #for email in ems:
             if recipients:
                 for email in recipients:
                     del msg['To']

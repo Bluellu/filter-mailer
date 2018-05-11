@@ -71,6 +71,13 @@ def filter_preview(app):
         warning.grid()
         
 
+def attach_image(img_path):
+    ''' Set attached-image label (helper for email_creation). '''    
+    img_path.config(text = askopenfilename(initialdir = "C:/",
+                                title = "import file",
+                                filetypes =
+                                [('Image', ('*jpeg', '*.jpg')),
+                                ('Image', '*.png',)]))
 def email_creation(app):
     ''' Construct email-creation window. '''
     
@@ -91,45 +98,51 @@ def email_creation(app):
     msg_lbl = tk.Label(ec, text = "Message")
     msg_box = tkscrolled.ScrolledText(ec, height = 10)
 
+    #Selected image attachment path
+    img_path = tk.Label(ec)
+
     #Attachment button
     img_bttn = tk.Button(ec, text = "Attach Image", width = 0,
                         fg = "white",
                         bg = "navy",
-                        #command = (lambda: attach_image(ec))
-                        )
+                        command = (lambda: attach_image(img_path)))
+    
     #Login/Send button
     login_bttn = tk.Button(ec, text = "Log in and send emails", width = 70,
                         fg = "white",
                         bg = "navy",
                         command = (lambda: login_and_send(ec, subj_box.get(),
                                                               msg_box.get("1.0", 'end-1c'),
-                                                              recipients))
-                        )
+                                                              img_path.cget("text"),
+                                                              recipients)))
 
     #Sender box
     recip_lbl = tk.Label(ec, text = "Recipients", bg = "light blue")
     recip_box = create_list_wgt(ec, recipients, 20, 15)
     
     #Add items to grid
-    recip_lbl.grid(column = 1, row = 0, sticky = "nsew")
-    recip_box.grid(column = 1, row = 1, rowspan = 4, sticky = "nsew")
+    recip_lbl.grid(column = 2, row = 0, sticky = "nsew")
+    recip_box.grid(column = 2, row = 1, rowspan = 3, sticky = "nsew")
 
-    subj_lbl.grid(column = 0, row = 0, padx = 10, sticky = "w")
-    subj_box.grid(column = 0, row = 1, padx = (10, 25), sticky = "ew")
+    subj_lbl.grid(column = 0, row = 0, columnspan = 2, padx = 10, sticky = "w")
+    subj_box.grid(column = 0, row = 1, columnspan = 2, padx = (10, 25), sticky = "ew")
 
-    msg_lbl.grid(column = 0, row = 2, padx = 10, sticky = "w")
-    msg_box.grid(column = 0, row = 3, padx = 10, sticky = "nsew")
+    msg_lbl.grid(column = 0, row = 2, columnspan = 2, padx = 10, sticky = "w")
+    msg_box.grid(column = 0, row = 3, columnspan = 2, padx = 10, sticky = "nsew")
 
+    img_path.grid(column = 1, row = 4, columnspan = 3, sticky = "w")
     img_bttn.grid(column = 0, row = 4, padx = 10, pady = 10, sticky = "w")
-    login_bttn.grid(column = 0, row = 5, columnspan = 2, padx = 50, pady = 10, sticky = "ns")
+    
+    login_bttn.grid(column = 0, row = 5, columnspan = 3, padx = 50, pady = 10, sticky = "ns")
 
-    ec.columnconfigure(0, weight = 1)
+    ec.columnconfigure(0, weight = 0)
+    ec.columnconfigure(1, weight = 1)
     ec.rowconfigure(3, weight = 1)
     
 
-def login_and_send(ec, subj, msg, recipients):
+def login_and_send(ec, subj, msg, img_path, recipients):
     ''' Construct login window. Child of email-creation window. '''
-    
+
     ls = tk.Toplevel(ec, bd = 15)
     ls.wm_title("Log in")
     ls.geometry("300x200")
@@ -157,12 +170,13 @@ def login_and_send(ec, subj, msg, recipients):
     send_bttn = tk.Button(ls, text = "Send emails", width = 30,
                         fg = "white",
                         bg = "navy",
-                        command = (lambda: ml.mass_mail(subj,
+                        command = (lambda: ml.mail_all(subj,
                                                         msg,
                                                         email_box.get(),
                                                         pw_box.get(),
                                                         server_box.get(),
                                                         port_box.get(),
+                                                        img_path,
                                                         recipients)))
 
     sep = ttk.Separator(ls, orient = "horizontal")
