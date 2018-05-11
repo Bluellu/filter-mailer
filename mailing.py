@@ -5,19 +5,17 @@ from email.mime.text import MIMEText
 from time import sleep
 import io
 
-def mass_mail(subj, message, user, pw, server_addr, port, recipients):
-    '''Send identical emails to every contact in the recipient list. '''
+def connect_server(user, pw, server_addr, port):
     #Connect to host
+    server = None
     try:
-        server = None
         if port == '587':
             server = smtp.SMTP(server_addr, int(port))
             server.set_debuglevel(1)
             server.starttls() #start encrypted session
             server.ehlo()
-            print("connected to server")        
+            print("connected to server")
 
-            print("Starting encrypted session")
         elif port == '465':
             server = smtp.SMTP_SSL(server_addr, int(port))
             server.set_debuglevel(1)
@@ -25,26 +23,40 @@ def mass_mail(subj, message, user, pw, server_addr, port, recipients):
             print("connected to server") 
         else:
             messagebox.showinfo("Warning", "Port not supported. Please try 587 or 465.")
-            return False
+            return None
            
     except smtp.socket.gaierror:
         messagebox.showinfo("Error", "Could not contact host.")
-        return False    
+        return None   
 
     #Log user in
     try:
         if server is not None:
             server.login(user, pw)
-            print("Logged into server.")
+            print("Logged into server")
+            
     except smtp.SMTPAuthenticationError:
         messagebox.showinfo("Error", "Could not authenticate user.")
         server.quit()
-        return False
+        return None
+
+    #All good, return connected server
+    finally:
+        if server is not None:
+            return server
+        else:
+            return None
+    
+
+def mass_mail(subj, message, user, pw, server_addr, port, recipients):
+    '''Send identical emails to every contact in the recipient list. '''
+    
+    server = connect_server(user, pw, server_addr, port)
 
     #Send emails
     try:
         if server is not None:
-            ems = [''] #TEST
+            ems = [] #TEST
             for email in ems:
             #for email in recipients:
                 server.sendmail(user, email, 'Hello, this is a test.') #TEST
