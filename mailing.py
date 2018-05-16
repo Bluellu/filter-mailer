@@ -1,18 +1,15 @@
-import tkinter as tk
-from tkinter import messagebox
-import smtplib as smtp
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
 from os.path import normpath, basename
 from time import sleep
 import io
-
+import tkinter as tk
+from tkinter import messagebox
+import smtplib as smtp
 from email.message import EmailMessage
-from email.utils import make_msgid
-import mimetypes
+
 
 def connect_server(user, pw, server_addr, port):
+    ''' Connect to a given server and log the given user in. '''
+    
     #Connect to host
     server = None
     try:
@@ -53,11 +50,14 @@ def connect_server(user, pw, server_addr, port):
             return server
         else:
             return None
-    
+        
 
-def mail_all(subj, message, user, pw, server_addr, port, img_path, recipients):
-    '''Send identical emails to every contact in the recipient list. '''
-
+def construct_email(subj, message, img_path, user):
+    ''' Construct a base email with blank 'To' field for use by mail_all.
+        It includes HTML and plaintext alternatives to the message, with
+        an optional image attachment.
+        
+    '''    
     #Base email body
     msg = EmailMessage()
     msg['Subject'] = subj
@@ -77,7 +77,7 @@ def mail_all(subj, message, user, pw, server_addr, port, img_path, recipients):
             """
     html_msg = """"""
     
-    #Image attachment   
+    #Include image attachment   
     if img_path.strip() is not '':
         
         #Get file path
@@ -99,12 +99,19 @@ def mail_all(subj, message, user, pw, server_addr, port, img_path, recipients):
         msg.get_payload()[1].add_related(img_bin, 'image', img_type,
                                      cid = img_cid)
         
+    #Include no-image version of HTML  
     else:
-        html_msg = html1 + html2 #no-image version of HTML
+        html_msg = html1 + html2 
         msg.add_alternative(html_msg, subtype = 'html')
-        #msg.make_mixed() #convert to multipart/mixed
 
+    return msg
+        
 
+def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
+    ''' Send identical emails to every contact in the recipient list. '''
+
+    msg = construct_email(subj, message, img_path, user)
+    
     #Start server and send email to all recipients     
     server = connect_server(user, pw, server_addr, port)
     

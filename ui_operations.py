@@ -171,12 +171,12 @@ def login_and_send(ec, subj, msg, img_path, recipients):
                         fg = "white",
                         bg = "navy",
                         command = (lambda: ml.mail_all(subj,
-                                                        msg,
+                                                        msg,                                                       
+                                                        img_path,
                                                         email_box.get(),
                                                         pw_box.get(),
                                                         server_box.get(),
                                                         port_box.get(),
-                                                        img_path,
                                                         recipients)))
 
     sep = ttk.Separator(ls, orient = "horizontal")
