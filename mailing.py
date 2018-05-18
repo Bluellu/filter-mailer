@@ -77,6 +77,7 @@ def construct_email(subj, message, img_path, user):
                 </html>
             """
     html_msg = """"""
+    msg_w_br = message.replace('\n', '<br>').replace('\r', '')
     
     #Include image attachment   
     if img_path.strip() is not '':
@@ -93,7 +94,7 @@ def construct_email(subj, message, img_path, user):
 
         #Final HTML message with image ID
         if message is not '': #with message
-            html_msg = html1 +  """<p>"""+ message +"""</p><br>
+            html_msg = html1 +  """<p>"""+ msg_w_br +"""</p><br>
                                    <img src="cid:{img_cid}">""".format(
                                 img_cid = img_cid) + html2
 
@@ -110,7 +111,7 @@ def construct_email(subj, message, img_path, user):
     #No-image version of HTML  
     else:
         if message is not '':
-            html_msg = html1 + """<p>"""+ message +"""</p>""" + html2 
+            html_msg = html1 + """<p>"""+ msg_w_br +"""</p>""" + html2 
             msg.add_alternative(html_msg, subtype = 'html')
 
     return msg
