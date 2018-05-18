@@ -109,7 +109,7 @@ def construct_email(subj, message, img_path, user):
 
 def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
     ''' Send identical emails to every contact in the recipient list. '''
-
+    print(port)
     msg = construct_email(subj, message, img_path, user)
     
     #Start server and send email to all recipients     

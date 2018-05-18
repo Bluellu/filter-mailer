@@ -1,12 +1,13 @@
+'''Functions that create and modify UI elements. '''
+from os.path import normpath, basename
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from tkinter import ttk
-from os.path import normpath, basename
 import tkinter.scrolledtext as tkscrolled
+
 import excel_manipulation as em
 import mailing as ml
 
-'''Functions that modify and create UI elements. '''
 
 def center_window(window):
     ''' Center window within the screen. '''
@@ -115,7 +116,6 @@ def email_creation(app):
                                                               msg_box.get("1.0", 'end-1c'),
                                                               img_path.cget("text"),
                                                               recipients)))
-
     #Sender box
     recip_lbl = tk.Label(ec, text = "Recipients", bg = "light blue")
     recip_box = create_list_wgt(ec, recipients, 20, 15)
@@ -156,7 +156,10 @@ def login_and_send(ec, subj, msg, img_path, recipients):
 
     #Port input
     port_lbl = tk.Label(ls, text = "Port: ")
-    port_box = tk.Entry(ls)
+    value = '587'
+    port_box = ttk.Combobox(ls, textvariable = value, state = 'readonly')
+    port_box['values'] = ('587', '465')
+    port_box.current(0)
 
     #User email input
     email_lbl = tk.Label(ls, text = "Email: ")
