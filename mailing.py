@@ -26,7 +26,8 @@ def connect_server(user, pw, server_addr, port):
             server.ehlo()
             print("connected to server") 
         else:
-            messagebox.showinfo("Warning", "Port not supported. Please try 587 or 465.")
+            messagebox.showinfo("Warning", "Port not supported. "
+                                + "Please try 587 or 465.")
             return None
            
     except smtp.socket.gaierror:
@@ -70,7 +71,7 @@ def construct_email(subj, message, img_path, user):
                 <html>
                   <head></head>
                   <body>
-                    <p>"""+ message +"""</p><br>"""
+            """
     html2 = """
                   </body>
                 </html>
@@ -91,18 +92,26 @@ def construct_email(subj, message, img_path, user):
         img_cid = name_split[len(name_split)-2] #file name (no extension)
 
         #Final HTML message with image ID
-        html_msg = html1 + """<img src="cid:{img_cid}">""".format(
-                            img_cid = img_cid) + html2
+        if message is not '': #with message
+            html_msg = html1 +  """<p>"""+ message +"""</p><br>
+                                   <img src="cid:{img_cid}">""".format(
+                                img_cid = img_cid) + html2
+
+        else: #without message
+            html_msg = html1 + """<img src="cid:{img_cid}">""".format(
+                                img_cid = img_cid) + html2
+            
         msg.add_alternative(html_msg, subtype = 'html')
 
         #Attach image
         msg.get_payload()[1].add_related(img_bin, 'image', img_type,
                                      cid = img_cid)
         
-    #Include no-image version of HTML  
+    #No-image version of HTML  
     else:
-        html_msg = html1 + html2 
-        msg.add_alternative(html_msg, subtype = 'html')
+        if message is not '':
+            html_msg = html1 + """<p>"""+ message +"""</p>""" + html2 
+            msg.add_alternative(html_msg, subtype = 'html')
 
     return msg
         
@@ -111,7 +120,7 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
     ''' Send identical emails to every contact in the recipient list. '''
     print(port)
     msg = construct_email(subj, message, img_path, user)
-    
+   
     #Start server and send email to all recipients     
     server = connect_server(user, pw, server_addr, port)
     
@@ -127,7 +136,8 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
                     
     except smtp.SMTPRecipientsRefused as e:
         print(e)
-        messagebox.showinfo("Error", "The following recipient could not receive your message: "
+        messagebox.showinfo("Error", "The following recipient could not "
+                            + "receive your message: "
                             + ''.join(list(e.recipients.keys())))
     except smtp.SMTPDataError as e:
         print(e)
@@ -137,6 +147,7 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
         if server is not None:
             server.quit()
             messagebox.showinfo("Result", "All done.")
+
 
 
 

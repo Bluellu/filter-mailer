@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from tkinter import ttk
 import tkinter.scrolledtext as tkscrolled
+from tkinter import messagebox
 
 import excel_manipulation as em
 import mailing as ml
@@ -143,60 +144,65 @@ def email_creation(app):
 def login_and_send(ec, subj, msg, img_path, recipients):
     ''' Construct login window. Child of email-creation window. '''
 
-    ls = tk.Toplevel(ec, bd = 15)
-    ls.wm_title("Log in")
-    ls.geometry("300x200")
-    ls.update()
-    center_window(ls)    
-    ls.grab_set()
+    if (msg is '') and (img_path is ''):
+        messagebox.showinfo("Invalid input", "Please write a message and/or "
+                            + "attach an image.")
+        
+    else: #create login box
+        ls = tk.Toplevel(ec, bd = 15)
+        ls.wm_title("Log in")
+        ls.geometry("300x200")
+        ls.update()
+        center_window(ls)    
+        ls.grab_set()
 
-    #Server input
-    server_lbl = tk.Label(ls, text = "Server: ")
-    server_box = tk.Entry(ls)
+        #Server input
+        server_lbl = tk.Label(ls, text = "Server: ")
+        server_box = tk.Entry(ls)
 
-    #Port input
-    port_lbl = tk.Label(ls, text = "Port: ")
-    value = '587'
-    port_box = ttk.Combobox(ls, textvariable = value, state = 'readonly')
-    port_box['values'] = ('587', '465')
-    port_box.current(0)
+        #Port input
+        port_lbl = tk.Label(ls, text = "Port: ")
+        value = '587'
+        port_box = ttk.Combobox(ls, textvariable = value, state = 'readonly')
+        port_box['values'] = ('587', '465')
+        port_box.current(0)
 
-    #User email input
-    email_lbl = tk.Label(ls, text = "Email: ")
-    email_box = tk.Entry(ls)
+        #User email input
+        email_lbl = tk.Label(ls, text = "Email: ")
+        email_box = tk.Entry(ls)
 
-    #Password input
-    pw_lbl = tk.Label(ls, text = "Password: ")
-    pw_box = tk.Entry(ls, show = "*")
+        #Password input
+        pw_lbl = tk.Label(ls, text = "Password: ")
+        pw_box = tk.Entry(ls, show = "*")
 
-    #Send button
-    send_bttn = tk.Button(ls, text = "Send emails", width = 30,
-                        fg = "white",
-                        bg = "navy",
-                        command = (lambda: ml.mail_all(subj,
-                                                        msg,                                                       
-                                                        img_path,
-                                                        email_box.get(),
-                                                        pw_box.get(),
-                                                        server_box.get(),
-                                                        port_box.get(),
-                                                        recipients)))
+        #Send button
+        send_bttn = tk.Button(ls, text = "Send emails", width = 30,
+                            fg = "white",
+                            bg = "navy",
+                            command = (lambda: ml.mail_all(subj,
+                                                            msg,                                                       
+                                                            img_path,
+                                                            email_box.get(),
+                                                            pw_box.get(),
+                                                            server_box.get(),
+                                                            port_box.get(),
+                                                            recipients)))
 
-    sep = ttk.Separator(ls, orient = "horizontal")
-    
-    server_lbl.grid(column = 0, row = 0, padx = 10, pady = 5, sticky = "w")
-    port_lbl.grid(column = 0, row = 1, padx = 10, pady = 5, sticky = "w")
-    email_lbl.grid(column = 0, row = 3, padx = 10, pady = 5, sticky = "w")
-    pw_lbl.grid(column = 0, row = 4, padx = 10, pady = 5, sticky = "w")
+        sep = ttk.Separator(ls, orient = "horizontal")
+        
+        server_lbl.grid(column = 0, row = 0, padx = 10, pady = 5, sticky = "w")
+        port_lbl.grid(column = 0, row = 1, padx = 10, pady = 5, sticky = "w")
+        email_lbl.grid(column = 0, row = 3, padx = 10, pady = 5, sticky = "w")
+        pw_lbl.grid(column = 0, row = 4, padx = 10, pady = 5, sticky = "w")
 
-    sep.grid(column = 0, row = 2, columnspan = 2, sticky = "nsew")
+        sep.grid(column = 0, row = 2, columnspan = 2, sticky = "nsew")
 
-    server_box.grid(column = 1, row = 0, padx = 10, pady = 5, sticky = "nsew")
-    port_box.grid(column = 1, row = 1, padx = 10, pady = 5, sticky = "nsew")
-    email_box.grid(column = 1, row = 3, padx = 10, pady = 5, sticky = "nsew")
-    pw_box.grid(column = 1, row = 4, padx = 10, pady = 5, sticky = "nsew")
+        server_box.grid(column = 1, row = 0, padx = 10, pady = 5, sticky = "nsew")
+        port_box.grid(column = 1, row = 1, padx = 10, pady = 5, sticky = "nsew")
+        email_box.grid(column = 1, row = 3, padx = 10, pady = 5, sticky = "nsew")
+        pw_box.grid(column = 1, row = 4, padx = 10, pady = 5, sticky = "nsew")
 
-    send_bttn.grid(column = 0, row = 5, columnspan = 2, padx = 20, pady = 10, sticky = "ns")
+        send_bttn.grid(column = 0, row = 5, columnspan = 2, padx = 20, pady = 10, sticky = "ns")
 
 
     
