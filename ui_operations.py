@@ -149,12 +149,19 @@ def login_and_send(ec, subj, msg, img_path, recipients):
                             + "attach an image.")
         
     else: #create login box
+        ec.withdraw() #Hide parent window
         ls = tk.Toplevel(ec, bd = 15)
         ls.wm_title("Log in")
         ls.geometry("300x200")
         ls.update()
         center_window(ls)    
         ls.grab_set()
+
+        def ls_quit():
+            ec.deiconify()
+            ls.destroy()            
+
+        ls.protocol("WM_DELETE_WINDOW", ls_quit)
 
         #Server input
         server_lbl = tk.Label(ls, text = "Server: ")
@@ -176,17 +183,18 @@ def login_and_send(ec, subj, msg, img_path, recipients):
         pw_box = tk.Entry(ls, show = "*")
 
         #Send button
+        def send_handler(): 
+            ml.mail_all(subj, msg, img_path, email_box.get(), pw_box.get(),
+                                                            server_box.get(),
+                                                            port_box.get(),
+                                                            recipients)
+            ls.destroy()
+            ec.deiconify()
+            
         send_bttn = tk.Button(ls, text = "Send emails", width = 30,
                             fg = "white",
                             bg = "navy",
-                            command = (lambda: ml.mail_all(subj,
-                                                            msg,                                                       
-                                                            img_path,
-                                                            email_box.get(),
-                                                            pw_box.get(),
-                                                            server_box.get(),
-                                                            port_box.get(),
-                                                            recipients)))
+                            command = send_handler)
 
         sep = ttk.Separator(ls, orient = "horizontal")
         
@@ -203,6 +211,8 @@ def login_and_send(ec, subj, msg, img_path, recipients):
         pw_box.grid(column = 1, row = 4, padx = 10, pady = 5, sticky = "nsew")
 
         send_bttn.grid(column = 0, row = 5, columnspan = 2, padx = 20, pady = 10, sticky = "ns")
+
+        
 
 
     

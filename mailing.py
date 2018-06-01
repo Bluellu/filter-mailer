@@ -32,7 +32,11 @@ def connect_server(user, pw, server_addr, port):
            
     except smtp.socket.gaierror:
         messagebox.showinfo("Error", "Could not contact host.")
-        return None   
+        return None
+    
+    except smtp.SMTPConnectError:
+        messagebox.showinfo("Error", "Connection failed.")
+        return None        
 
     #Log user in
     try:
@@ -44,13 +48,14 @@ def connect_server(user, pw, server_addr, port):
         messagebox.showinfo("Error", "Could not authenticate user.")
         server.quit()
         return None
+    
+    except smtp.SMTPServerDisconnected:
+        messagebox.showinfo("Warning", "Server disconnected (in connect_server).")
+        return None
 
     #All good, return connected server
     finally:
-        if server is not None:
-            return server
-        else:
-            return None
+        return server
         
 
 def construct_email(subj, message, img_path, user):
@@ -125,29 +130,33 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
     #Start server and send email to all recipients     
     server = connect_server(user, pw, server_addr, port)
     
-    try:
-        if server is not None:
-            if recipients:
-                for email in recipients:
+    if server is not None:
+        if recipients:
+            for email in recipients:
+                try:
                     del msg['To']
                     msg['To'] = email
                     server.send_message(msg)
                     print("Sent to " + email)
-                    sleep(20) #Only send 3 emails per minute
+                    #sleep(20) #Only send 3 emails per minute
+                        
+                except smtp.SMTPRecipientsRefused as e:
+                    print(e)
+                    messagebox.showinfo("Error", "The following recipient could not "
+                                        + "receive your message: "
+                                        + ''.join(list(e.recipients.keys())))
                     
-    except smtp.SMTPRecipientsRefused as e:
-        print(e)
-        messagebox.showinfo("Error", "The following recipient could not "
-                            + "receive your message: "
-                            + ''.join(list(e.recipients.keys())))
-    except smtp.SMTPDataError as e:
-        print(e)
-        messagebox.showinfo("Error", "Unexpected Error code.")    
+                except smtp.SMTPDataError as e:
+                    print(e)
+                    messagebox.showinfo("Error", "Unexpected Error code.")
 
-    finally:
-        if server is not None:
-            server.quit()
-            messagebox.showinfo("Result", "All done.")
+                except smtp.SMTPServerDisconnected:
+                    messagebox.showinfo("Warning", "Server disconnected (in mail_all).")                    
+            
+            status = server.noop()
+            if status[0] == 250:
+                server.quit()
+                messagebox.showinfo("Result", "All done.")
 
 
 
