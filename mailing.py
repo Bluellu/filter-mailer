@@ -1,10 +1,13 @@
 from os.path import normpath, basename
 from time import sleep
 import io
+import datetime as dt
 import tkinter as tk
 from tkinter import messagebox
 import smtplib as smtp
 from email.message import EmailMessage
+
+import pandas as pd
 
 
 def connect_server(user, pw, server_addr, port):
@@ -127,9 +130,21 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
     print(port)
     msg = construct_email(subj, message, img_path, user)
    
-    #Start server and send email to all recipients     
+    #Start server    
     server = connect_server(user, pw, server_addr, port)
+
+    #Create backup excel file to keep track of sending status
+    dt_now = dt.datetime.now().strftime("%d-%m-%y__%H-%M")
+    backup_fn = 'backup\\backup_'+ dt_now +'.xlsx' #timestamped filename
     
+    xl_writer = pd.ExcelWriter(backup_fn)
+    data = {'Sent_to': recipients, 'Unsent_to': '' * len(recipients)}
+    df = pd.DataFrame(data, columns = ['Sent_to', 'Unsent_to'])
+
+    df.to_excel(xl_writer, 'sheet1', engine = 'openpyxl')
+    xl_writer.save()
+
+    #Send email to all recipients  
     if server is not None:
         if recipients:
             for email in recipients:
