@@ -123,7 +123,7 @@ def construct_email(subj, message, img_path, user):
             msg.add_alternative(html_msg, subtype = 'html')
 
     return msg
-        
+
 
 def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
     ''' Send identical emails to every contact in the recipient list. '''
@@ -133,13 +133,13 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
     #Start server    
     server = connect_server(user, pw, server_addr, port)
 
-    #Create backup excel file to keep track of sending status
+    #Create backup excel file to keep track of send status
     dt_now = dt.datetime.now().strftime("%d-%m-%y__%H-%M")
     backup_fn = 'backup\\backup_'+ dt_now +'.xlsx' #timestamped filename
     
     xl_writer = pd.ExcelWriter(backup_fn)
-    data = {'Sent_to': recipients, 'Unsent_to': '' * len(recipients)}
-    df = pd.DataFrame(data, columns = ['Sent_to', 'Unsent_to'])
+    data = {'Unsent_to': recipients, 'Sent_to': ''}
+    df = pd.DataFrame(data, columns = ['Unsent_to', 'Sent_to'])
 
     df.to_excel(xl_writer, 'sheet1', engine = 'openpyxl')
     xl_writer.save()
@@ -147,26 +147,49 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
     #Send email to all recipients  
     if server is not None:
         if recipients:
+            sent_i = 0 #index of last se t
+            curr_i = 0
+            last_i = len(recipients)
             for email in recipients:
                 try:
                     del msg['To']
                     msg['To'] = email
                     server.send_message(msg)
+
+                    #Add recipient to Sent_to column of backup spreadsheet
+                    df.Sent_to[sent_i] = email
+                    sent_i += 1
+
+                    with pd.option_context('display.max_rows', None, 'display.max_columns', 3):
+                        print(df)
+                            
+                    #Remove recipient from Unsent_to column of backup spreadsheet
+                    df.Unsent_to[curr_i:last_i] = df.Unsent_to[curr_i:last_i].shift(-1).fillna('')
+
+                    with pd.option_context('display.max_rows', None, 'display.max_columns', 3):
+                        print(df)
+
+                    #Save backup
+                    df.to_excel(xl_writer, 'sheet1', engine = 'openpyxl')
+                    xl_writer.save()
+                    
                     print("Sent to " + email)
-                    #sleep(20) #Only send 3 emails per minute
+                    sleep(20) #Only send 3 emails per minute
                         
                 except smtp.SMTPRecipientsRefused as e:
                     print(e)
-                    messagebox.showinfo("Error", "The following recipient could not "
+                    messagebox.showinfo("Warning", "The following recipient could not "
                                         + "receive your message: "
                                         + ''.join(list(e.recipients.keys())))
+                    curr_i += 1 #Skip removing the item at this index from unsent column
                     
                 except smtp.SMTPDataError as e:
                     print(e)
                     messagebox.showinfo("Error", "Unexpected Error code.")
+                    curr_i += 1 #Same as above
 
                 except smtp.SMTPServerDisconnected:
-                    messagebox.showinfo("Warning", "Server disconnected (in mail_all).")                    
+                    messagebox.showinfo("Warning", "Server disconnected (in mail_all).")
             
             status = server.noop()
             if status[0] == 250:
