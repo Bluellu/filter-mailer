@@ -26,11 +26,11 @@ def center_window(window):
     
 def get_filepath(app, label):
     """ Set the app's filepath to a chosen file and
-        update the GUI label to display the chosen file's name.
+    update the GUI label to display the chosen file's name.
 
-        Args:
-            app: App instance containing the filepath argument to be set.
-            label: GUI label to be updated to display the new file's name.            
+    Args:
+        app(App): Main application instance containing the filepath argument.
+        label(tk.Label): GUI label to be updated to display the new file's name.            
         
     """
     app.filepath = askopenfilename(initialdir = "C:/",
@@ -45,7 +45,7 @@ def get_filepath(app, label):
 
 
 def create_list_wgt(app, txt_list, x, y):
-    '''Return a text widget that displays the given list, with size x by y.'''
+    ''' Return a text widget that displays the given list, with size x by y.'''
     txt_widget = tkscrolled.ScrolledText(app, width = x, height = y)    
     for item in txt_list:
         txt_widget.insert(tk.END, item + '\n')
@@ -55,7 +55,7 @@ def create_list_wgt(app, txt_list, x, y):
 def filter_preview(app):
     """ Display filtered version of the email list in new window. """
     
-    #Create pop-up window
+    # Create pop-up window
     prvw = tk.Toplevel(app.frame)
     prvw.wm_title("Filter Preview")
 
@@ -90,26 +90,26 @@ def email_creation(app):
     center_window(ec)    
     ec.grab_set()
 
-    recipients = em.get_sorted_emails(app)[0] #Approved emails
+    recipients = em.get_sorted_emails(app)[0] # Approved emails
 
-    #Subject
+    # Subject
     subj_lbl = tk.Label(ec, text = "Subject")
     subj_box = tk.Entry(ec)
 
-    #Message
+    # Message
     msg_lbl = tk.Label(ec, text = "Message")
     msg_box = tkscrolled.ScrolledText(ec, height = 10)
 
-    #Selected image attachment path
+    # Selected image attachment path
     img_path = tk.Label(ec)
 
-    #Attachment button
+    # Attachment button
     img_bttn = tk.Button(ec, text = "Attach Image", width = 0,
                         fg = "white",
                         bg = "navy",
                         command = (lambda: attach_image(img_path)))
     
-    #Login/Send button
+    # Login/Send button
     login_bttn = tk.Button(ec, text = "Log in and send emails", width = 70,
                         fg = "white",
                         bg = "navy",
@@ -117,11 +117,11 @@ def email_creation(app):
                                                               msg_box.get("1.0", 'end-1c'),
                                                               img_path.cget("text"),
                                                               recipients)))
-    #Sender box
+    # Sender box
     recip_lbl = tk.Label(ec, text = "Recipients", bg = "light blue")
     recip_box = create_list_wgt(ec, recipients, 20, 15)
     
-    #Add items to grid
+    # Add items to grid
     recip_lbl.grid(column = 2, row = 0, sticky = "nsew")
     recip_box.grid(column = 2, row = 1, rowspan = 3, sticky = "nsew")
 
@@ -148,7 +148,7 @@ def login_and_send(ec, subj, msg, img_path, recipients):
         messagebox.showinfo("Invalid input", "Please write a message and/or "
                             + "attach an image.")
         
-    else: #create login box
+    else: # create login box
         ec.withdraw() #Hide parent window
         ls = tk.Toplevel(ec, bd = 15)
         ls.wm_title("Log in")
@@ -163,26 +163,26 @@ def login_and_send(ec, subj, msg, img_path, recipients):
 
         ls.protocol("WM_DELETE_WINDOW", ls_quit)
 
-        #Server input
+        # Server input
         server_lbl = tk.Label(ls, text = "Server: ")
         server_box = tk.Entry(ls)
 
-        #Port input
+        # Port input
         port_lbl = tk.Label(ls, text = "Port: ")
         value = '587'
         port_box = ttk.Combobox(ls, textvariable = value, state = 'readonly')
         port_box['values'] = ('587', '465')
         port_box.current(0)
 
-        #User email input
+        # User email input
         email_lbl = tk.Label(ls, text = "Email: ")
         email_box = tk.Entry(ls)
 
-        #Password input
+        # Password input
         pw_lbl = tk.Label(ls, text = "Password: ")
         pw_box = tk.Entry(ls, show = "*")
 
-        #Send button
+        # Send button
         def send_handler(): 
             ml.mail_all(subj, msg, img_path, email_box.get(), pw_box.get(),
                                                             server_box.get(),
