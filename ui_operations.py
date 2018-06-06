@@ -70,16 +70,9 @@ def filter_preview(app):
     
     else:
         warning = tk.Label(prvw, text = "No File Selected")
-        warning.grid()
-        
+        warning.grid()        
 
-def attach_image(img_path):
-    ''' Set attached-image label (helper for email_creation). '''    
-    img_path.config(text = askopenfilename(initialdir = "C:/",
-                                title = "import file",
-                                filetypes =
-                                [('Image', ('*jpeg', '*.jpg')),
-                                ('Image', '*.png',)]))
+
 def email_creation(app):
     ''' Construct email-creation window. '''
     
@@ -103,7 +96,15 @@ def email_creation(app):
     # Selected image attachment path
     img_path = tk.Label(ec)
 
-    # Attachment button
+    # Image attachment button setup
+    def attach_image(img_path):
+        ''' Set attached-image label (helper for email_creation). '''    
+        img_path.config(text = askopenfilename(initialdir = "C:/",
+                                    title = "import file",
+                                    filetypes =
+                                    [('Image', ('*jpeg', '*.jpg')),
+                                    ('Image', '*.png',)]))
+    
     img_bttn = tk.Button(ec, text = "Attach Image", width = 0,
                         fg = "white",
                         bg = "navy",
@@ -182,14 +183,19 @@ def login_and_send(ec, subj, msg, img_path, recipients):
         pw_lbl = tk.Label(ls, text = "Password: ")
         pw_box = tk.Entry(ls, show = "*")
 
-        # Send button
-        def send_handler(): 
-            ml.mail_all(subj, msg, img_path, email_box.get(), pw_box.get(),
+        # Send button setup
+        def send_handler():
+            success = ml.mail_all(subj, msg, img_path, email_box.get(),
+                                                            pw_box.get(),
                                                             server_box.get(),
                                                             port_box.get(),
                                                             recipients)
-            ls.destroy()
-            ec.deiconify()
+            ls.destroy() 
+            if success: # Emails sent successfuly, can close email_creation
+                ec.destroy()
+            else: # Unsuccessful, restore email-creation window
+                ls_quit()
+                ec.grab_set()
             
         send_bttn = tk.Button(ls, text = "Send emails", width = 30,
                             fg = "white",

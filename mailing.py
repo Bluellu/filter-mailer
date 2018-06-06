@@ -27,13 +27,12 @@ def connect_server(user, pw, server_addr, port):
             #server.set_debuglevel(1)
             server.starttls() # start encrypted session
             server.ehlo()
-            print("connected to server")
 
         elif port == '465':
             server = smtp.SMTP_SSL(server_addr, int(port))
             #server.set_debuglevel(1)
             server.ehlo()
-            print("connected to server") 
+
         else:
             messagebox.showinfo("Warning", "Port not supported. "
                                 + "Please try 587 or 465.")
@@ -41,11 +40,11 @@ def connect_server(user, pw, server_addr, port):
            
     except smtp.socket.gaierror:
         messagebox.showinfo("Error", "Could not contact host.")
-        return None
+        server = None
     
     except smtp.SMTPConnectError:
         messagebox.showinfo("Error", "Connection failed.")
-        return None        
+        server = None        
 
     # Log user in
     try:
@@ -56,11 +55,11 @@ def connect_server(user, pw, server_addr, port):
     except smtp.SMTPAuthenticationError:
         messagebox.showinfo("Error", "Could not authenticate user.")
         server.quit()
-        return None
+        server = None
     
     except smtp.SMTPServerDisconnected:
         messagebox.showinfo("Warning", "Server disconnected during login.")
-        return None
+        server = None
 
     # All good, return connected server
     finally:
@@ -132,14 +131,21 @@ def construct_email(subj, message, img_path, user):
 
 
 def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
-    ''' Send identical emails to every contact in the recipient list. '''
+    ''' Send identical emails to every contact in the recipient list.
+
+        Returns:
+            bool: Success status.
+    '''
     
+    server = connect_server(user, pw, server_addr, port)    
     msg = construct_email(subj, message, img_path, user) 
-    server = connect_server(user, pw, server_addr, port) 
+
     backup_f = em.BackupFile(recipients) # excel file for send-status backup
 
-    # Send email to all recipients  
-    if server is not None:
+    # Send email to all recipients
+    if server is None:
+        return False
+    else:
         if recipients:
             curr_i = 0
             for email in recipients:
@@ -172,6 +178,7 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
             if status[0] == 250:
                 server.quit()
                 messagebox.showinfo("Result", "All done.")
+            return True
 
 
 
