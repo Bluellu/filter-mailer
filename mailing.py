@@ -130,6 +130,28 @@ def construct_email(subj, message, img_path, user):
     return msg
 
 
+def mail_final_report(user, server, msg, success_lst, fail_lst):
+    ''' Emails a copy of the mass-mailed message to the sender (user) including
+    a report of which recipients have received it or not.
+
+    Args:
+        user: Sender's email.
+        server: A connected SMTP server.
+        msg: An EmailMessage object. 
+        success_lst: A list of recipients towards which a successful attempt
+            at sending msg has been made.
+        fail_lst: List of recipients that could not the message.
+    '''
+
+    # TODO: include success/failure lists in msg
+    # (either as text or an attachment).
+    
+    if server:
+        del msg['To']
+        msg['To'] = user
+        server.send_message(msg) # TODO: error handling
+    
+
 def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
     ''' Send identical emails to every contact in the recipient list.
 
@@ -147,6 +169,8 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
         return False
     else:
         if recipients:
+            success_lst = []
+            failure_lst = []
             curr_i = 0
             for email in recipients:
                 try:
@@ -156,27 +180,32 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
 
                     # Update backup
                     backup_f.update(email, curr_i)
-                    
+                    success_lst.append(email)
                     #sleep(20) # Only send 3 emails per minute
                         
                 except smtp.SMTPRecipientsRefused as e:
                     print(e)
-                    messagebox.showinfo("Warning", "The following recipient "
-                                        + "could no receive your message: "
-                                        + ''.join(list(e.recipients.keys())))
                     curr_i += 1 # Skip this index from unsent column
+                    failure_lst.append(email)
                     
                 except smtp.SMTPDataError as e:
                     print(e)
                     messagebox.showinfo("Error", "Unexpected Error code.")
                     curr_i += 1 # Same as above
+                    failure_lst.append(email)
 
                 except smtp.SMTPServerDisconnected:
-                    messagebox.showinfo("Warning", "Server disconnected.")
+                    messagebox.showinfo("Warning", "Server disconnected.")                    
 
-                # For unexpected errors in sending
-                except:
-                    curr_i += 1
+            # Display warning about unsent emails
+            if failure_lst: 
+                failures = ', '.join(failure_lst) + '.'
+                    
+                messagebox.showinfo("Warning", "The following recipients "
+                                    + "could no receive your message:\n "
+                                    + failures) # TODO: Make this a scrollable widget
+
+            mail_final_report(user, server, msg, success_lst, failure_lst)
             
             status = server.noop()
             if status[0] == 250:
