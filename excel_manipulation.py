@@ -58,10 +58,14 @@ class BackupFile:
         # Ovewrite backup file
         self.df.to_excel(self.writer, 'sheet1', engine = 'openpyxl')
         self.writer.save()
-
         
+
+"""
+Independent Functions
+"""
+
 def extract_email_lst(app):
-    """ Extract and return a list of emails from an excel file column.
+    """ Extract and return a list of emails from an excel file.
 
     Args:
         app(App): The app instance containing the desired excel filepath.
@@ -71,24 +75,32 @@ def extract_email_lst(app):
     """
     ordered_email_lst = []
     if (app.filepath):
-        col_name = 'E-Mail'
+        valid_names = ['E-Mail', 'Unsent_to'] 
         
         df = pd.read_excel(app.filepath)
-     
-        if col_name in df.columns.values:
-            email_lst = df[df[col_name].notnull()][col_name].values #TODO: Allow different spellings with regex
+        cols = df.columns.values
+
+        # Find valid email column ('Failed' column if input is a backup file)
+        # TODO: Allow different 'E-Mail' spellings (possibly through regex)
+        col_name = None
+        for name in valid_names:
+            if name in cols:
+                if name is not None: # For now, pick the first valid column
+                    col_name = name
+                    # Potential TODO: allow user to select correct email column 
+                    
+        if col_name:
+            email_lst = df[df[col_name].notnull()][col_name].values 
 
             # Remove duplicates
             ordered_email_lst = list(OrderedDict.fromkeys(email_lst))
         
-    return ordered_email_lst
-
-    # TODO: allow user to select correct email column if multiple available
+    return ordered_email_lst 
 
 
 def contains_term(email, terms):
     """ Return a boolean indicating whether an email contains any of the given
-        sub-terms. Helper for filter_emails.
+    sub-terms. Helper for filter_emails.
 
     """
     contains = False
@@ -100,16 +112,17 @@ def contains_term(email, terms):
                     break
     return contains
 
+
 def filter_emails(email_lst, include_lst, exclude_lst):
     """ Separate an email list into approved and rejected email lists.
 
-        Args:
-            email_lst: List of all emails to be analyzed.
-            include_lst: List of terms to be included. If empty, all items match.
-            exclude_lst: List of terms to be filtered out.
-        Returns:
-            approved_ems: Emails that passed the filter.
-            rejected_ems: Emails to be excluded.
+    Args:
+        email_lst: List of all emails to be analyzed.
+        include_lst: List of terms to be included. If empty, all items match.
+        exclude_lst: List of terms to be filtered out.
+    Returns:
+        approved_ems: Emails that passed the filter.
+        rejected_ems: Emails to be excluded.
         
     """
     approved_ems = []
@@ -128,7 +141,10 @@ def filter_emails(email_lst, include_lst, exclude_lst):
 
 
 def process_list(string):
-    """ Create list from string with items separated by commas. """
+    """ Create list from string with items separated by commas
+    Helper for get_sorted_emails.
+    """
+    
     # Remove all spaces
     no_spaces = "".join(string.split())
 
@@ -137,9 +153,11 @@ def process_list(string):
 
     # Remove empty strings and return
     return list(filter(None, split_lst))
+
     
 def get_sorted_emails(app):
     """ Get approved and rejected email lists from current app state. """
+    
     emails = []
     include = []
     exclude = []

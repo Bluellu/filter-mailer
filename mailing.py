@@ -133,12 +133,12 @@ def construct_email(subj, message, img_path, user):
 def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
     ''' Send identical emails to every contact in the recipient list.
 
-        Returns:
-            bool: Success status.
+    Returns:
+        bool: Success status.
     '''
     
     server = connect_server(user, pw, server_addr, port)    
-    msg = construct_email(subj, message, img_path, user) 
+    msg = construct_email(subj, message, img_path, user)
 
     backup_f = em.BackupFile(recipients) # excel file for send-status backup
 
@@ -173,6 +173,10 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
 
                 except smtp.SMTPServerDisconnected:
                     messagebox.showinfo("Warning", "Server disconnected.")
+
+                # For unexpected errors in sending
+                except:
+                    curr_i += 1
             
             status = server.noop()
             if status[0] == 250:
