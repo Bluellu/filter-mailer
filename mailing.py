@@ -44,7 +44,12 @@ def connect_server(user, pw, server_addr, port):
     
     except smtp.SMTPConnectError:
         messagebox.showinfo("Error", "Connection failed.")
-        server = None        
+        server = None
+
+    except TimeoutError:
+        messagebox.showinfo("Timeout Error", "No response.")
+        
+        
 
     # Log user in
     try:
@@ -152,7 +157,8 @@ def mail_final_report(user, server, msg, success_lst, fail_lst):
         server.send_message(msg) # TODO: error handling
     
 
-def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
+def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients,
+             stat_handler):
     ''' Send identical emails to every contact in the recipient list.
 
     Returns:
@@ -173,6 +179,8 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
             failure_lst = []
             curr_i = 0
             for email in recipients:
+                stat_handler.updateMessage(email)
+                print("Sending to: " + email)
                 try:
                     del msg['To']
                     msg['To'] = email
@@ -181,7 +189,7 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients):
                     # Update backup
                     backup_f.update(email, curr_i)
                     success_lst.append(email)
-                    #sleep(20) # Only send 3 emails per minute
+                    sleep(5) # Only send 3 emails per minute
                         
                 except smtp.SMTPRecipientsRefused as e:
                     print(e)

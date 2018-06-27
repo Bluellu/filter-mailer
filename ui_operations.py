@@ -5,11 +5,48 @@ from tkinter.filedialog import askopenfilename
 from tkinter import ttk
 import tkinter.scrolledtext as tkscrolled
 from tkinter import messagebox
+from time import sleep
 
 import excel_manipulation as em
 import mailing as ml
 
+class StatusHandler:
+    ''' Creates and manages a status-display window to be used
+    within mail_all. '''
+    
+    def __init__(self, parent, num_iters):
+        self.root = parent
+        self.iters = num_iters
+        self.curr_iter = 0
+        
+        self.frame = tk.Toplevel(self.root, bd = 15) 
+        self.frame.wm_title("Sending Emails: Status")
+        self.frame.geometry("300x200")
 
+        self.frame.update()
+        center_window(self.frame) 
+   
+        self.frame.grab_set()
+        
+        self.text = subj_lbl = tk.Label(self.frame, text = "Beginning....")
+        self.text.grid(column = 0, row = 0, padx = 10, sticky = "w")
+
+        self.frame.update()
+        center_window(self.frame) 
+
+    def updateMessage(self, recipient):
+        self.curr_iter += 1
+        self.text.config(text = "Sending email " + str(self.curr_iter) + " of "
+                         + str(self.iters) + " to:\n" + recipient)
+        self.frame.update()
+
+        # Last update. Return control to parent window and self-destruct.
+        if (self.curr_iter == self.iters):
+            sleep(5)
+            self.root.grab_set()
+            self.frame.destroy()
+            
+        
 def center_window(window):
     ''' Center window within the screen. '''
     
@@ -114,7 +151,7 @@ def email_creation(app):
     login_bttn = tk.Button(ec, text = "Log in and send emails", width = 70,
                         fg = "white",
                         bg = "navy",
-                        command = (lambda: login_and_send(ec, subj_box.get(),
+                        command = (lambda: login_and_send(app, ec, subj_box.get(),
                                                               msg_box.get("1.0", 'end-1c'),
                                                               img_path.cget("text"),
                                                               recipients)))
@@ -142,7 +179,7 @@ def email_creation(app):
     ec.rowconfigure(3, weight = 1)
     
 
-def login_and_send(ec, subj, msg, img_path, recipients):
+def login_and_send(app, ec, subj, msg, img_path, recipients):
     ''' Construct login window. Child of email-creation window. '''
 
     if (msg is '') and (img_path is ''):
@@ -185,17 +222,23 @@ def login_and_send(ec, subj, msg, img_path, recipients):
 
         # Send button setup
         def send_handler():
+            ls.withdraw() 
+            stat_handler = StatusHandler(app.frame, len(recipients))
             success = ml.mail_all(subj, msg, img_path, email_box.get(),
                                                             pw_box.get(),
                                                             server_box.get(),
                                                             port_box.get(),
-                                                            recipients)
-            ls.destroy() 
-            if success: # Emails sent successfuly, can close email_creation
-                ec.destroy()
-            else: # Unsuccessful, restore email-creation window
-                ls_quit()
-                ec.grab_set()
+                                                            recipients,
+                                                            stat_handler)
+            # Return to main app window
+            ls.destroy()
+            ec.destroy()
+
+##            if success: # Emails sent successfuly, can close email_creation
+##                ec.destroy()
+##            else: # Unsuccessful
+##                ls_quit()
+##                ec.grab_set()
             
         send_bttn = tk.Button(ls, text = "Send emails", width = 30,
                             fg = "white",
@@ -217,10 +260,6 @@ def login_and_send(ec, subj, msg, img_path, recipients):
         pw_box.grid(column = 1, row = 4, padx = 10, pady = 5, sticky = "nsew")
 
         send_bttn.grid(column = 0, row = 5, columnspan = 2, padx = 20, pady = 10, sticky = "ns")
-
-        
-
-
     
 
 
