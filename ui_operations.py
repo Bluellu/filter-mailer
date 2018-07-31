@@ -99,11 +99,16 @@ def filter_preview(app):
     if (app.filepath):
         filtered_emails = em.get_sorted_emails(app)
 
-        accepted_lst = create_list_wgt(prvw, filtered_emails[0], 20, 20)
-        accepted_lst.grid(column = 0, row = 1)
+        accepted_lbl = tk.Label(prvw, text = "Accepted", fg = "navy", bg = "light blue")
+        rejected_lbl = tk.Label(prvw, text = "Rejected", fg = "navy", bg = "light blue")
 
+        accepted_lst = create_list_wgt(prvw, filtered_emails[0], 20, 20)
         rejected_lst = create_list_wgt(prvw, filtered_emails[1], 20, 20)
-        rejected_lst.grid(column = 1, row = 1)         
+        
+        accepted_lbl.grid(column = 0, row = 1, sticky='ew')
+        rejected_lbl.grid(column = 1, row = 1, sticky='ew')
+        accepted_lst.grid(column = 0, row = 2)
+        rejected_lst.grid(column = 1, row = 2)        
     
     else:
         warning = tk.Label(prvw, text = "No File Selected")
@@ -233,12 +238,6 @@ def login_and_send(app, ec, subj, msg, img_path, recipients):
             # Return to main app window
             ls.destroy()
             ec.destroy()
-
-##            if success: # Emails sent successfuly, can close email_creation
-##                ec.destroy()
-##            else: # Unsuccessful
-##                ls_quit()
-##                ec.grab_set()
             
         send_bttn = tk.Button(ls, text = "Send emails", width = 30,
                             fg = "white",
