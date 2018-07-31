@@ -1,10 +1,11 @@
 from os.path import normpath, basename
 from time import sleep
-import io
+import io, os
 import tkinter as tk
 from tkinter import messagebox
 import smtplib as smtp
 from email.message import EmailMessage
+from email.mime.text import MIMEText
 
 import excel_manipulation as em
 
@@ -137,7 +138,8 @@ def construct_email(subj, message, img_path, user):
 
 def mail_final_report(user, server, msg, success_lst, fail_lst):
     ''' Emails a copy of the mass-mailed message to the sender (user) including
-    a report of which recipients have received it or not.
+    a report of which recipients have received it or not (A success list, and a
+    failure list as text attachments).
 
     Args:
         user: Sender's email.
@@ -154,7 +156,44 @@ def mail_final_report(user, server, msg, success_lst, fail_lst):
     if server:
         del msg['To']
         msg['To'] = user
-        server.send_message(msg) # TODO: error handling
+        
+        success_str = ''
+        for i in success_lst:
+            success_str = success_str + i + '\n'
+
+        fail_str = ''
+        for i in fail_lst:
+            fail_str = fail_str + i + '\n'        
+
+        # Attach files to message
+        att1 = MIMEText(success_str) 
+        att1.add_header('Content-Disposition', 'attachment', filename='successes.txt')
+        msg.make_mixed() 
+        msg.attach(att1)
+
+        att2 = MIMEText(fail_str) 
+        att2.add_header('Content-Disposition', 'attachment', filename='failures.txt')
+        msg.attach(att2) 
+
+        # Send message
+        try:
+            server.send_message(msg)
+                        
+        except smtp.SMTPRecipientsRefused as e:
+            print(e)
+            
+        except smtp.SMTPDataError as e:
+            print(e)
+
+        except smtp.SMTPServerDisconnected:
+            messagebox.showinfo("Warning", "Server disconnected.")
+
+        # Delete temporary files         
+        try:
+            os.remove('success.txt')
+            os.remove('failure.txt')           
+        except OSError:
+            pass
     
 
 def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients,
@@ -198,7 +237,6 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients,
                     
                 except smtp.SMTPDataError as e:
                     print(e)
-                    messagebox.showinfo("Error", "Unexpected Error code.")
                     curr_i += 1 # Same as above
                     failure_lst.append(email)
 
