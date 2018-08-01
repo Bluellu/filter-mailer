@@ -48,9 +48,7 @@ def connect_server(user, pw, server_addr, port):
         server = None
 
     except TimeoutError:
-        messagebox.showinfo("Timeout Error", "No response.")
-        
-        
+        messagebox.showinfo("Timeout Error", "No response.")        
 
     # Log user in
     try:
@@ -157,6 +155,10 @@ def mail_final_report(user, server, msg, success_lst, fail_lst):
         del msg['To']
         msg['To'] = user
         
+        temp_subj = msg['Subject'] + ' (sender copy)'
+        del msg['Subject']
+        msg['Subject'] = temp_subj
+        
         success_str = ''
         for i in success_lst:
             success_str = success_str + i + '\n'
@@ -168,7 +170,7 @@ def mail_final_report(user, server, msg, success_lst, fail_lst):
         # Attach files to message
         att1 = MIMEText(success_str) 
         att1.add_header('Content-Disposition', 'attachment', filename='successes.txt')
-        msg.make_mixed() 
+        #msg.make_mixed() 
         msg.attach(att1)
 
         att2 = MIMEText(fail_str) 
@@ -218,38 +220,52 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients,
             failure_lst = []
             curr_i = 0
             for email in recipients:
-                stat_handler.updateMessage(email)
-                print("Sending to: " + email)
-                try:
-                    del msg['To']
-                    msg['To'] = email
-                    server.send_message(msg)
 
-                    # Update backup
-                    backup_f.update(email, curr_i)
-                    success_lst.append(email)
-                    sleep(5) # Only send 3 emails per minute
+                # Cancel button has been pressed. End of execution.
+                if stat_handler.cancelled():
+                    print("CANCELLED")
+
+                    curr_index = recipients.index(email)
+                    recipients_rest = recipients[curr_index:len(recipients)]
+                    failure_lst = failure_lst + recipients_rest
+                    stat_handler.self_destruct()
+                    print(success_lst, failure_lst)
+                    #mail_final_report(user, server, msg, success_lst, failure_lst)
+                    break
+
+                else:
+                    stat_handler.updateMessage(email)
+                    print("Sending to: " + email)
+                    try:
+                        del msg['To']
+                        msg['To'] = email
+                        server.send_message(msg)
+
+                        # Update backup
+                        backup_f.update(email, curr_i)
+                        success_lst.append(email)
+                        sleep(5) # Only send 3 emails per minute
+                            
+                    except smtp.SMTPRecipientsRefused as e:
+                        print(e)
+                        curr_i += 1 # Skip this index from unsent column
+                        failure_lst.append(email)
                         
-                except smtp.SMTPRecipientsRefused as e:
-                    print(e)
-                    curr_i += 1 # Skip this index from unsent column
-                    failure_lst.append(email)
-                    
-                except smtp.SMTPDataError as e:
-                    print(e)
-                    curr_i += 1 # Same as above
-                    failure_lst.append(email)
+                    except smtp.SMTPDataError as e:
+                        print(e)
+                        curr_i += 1 # Same as above
+                        failure_lst.append(email)
 
-                except smtp.SMTPServerDisconnected:
-                    messagebox.showinfo("Warning", "Server disconnected.")                    
+                    except smtp.SMTPServerDisconnected:
+                        messagebox.showinfo("Warning", "Server disconnected.")                    
 
-            # Display warning about unsent emails
-            if failure_lst: 
-                failures = ', '.join(failure_lst) + '.'
-                    
-                messagebox.showinfo("Warning", "The following recipients "
-                                    + "could no receive your message:\n "
-                                    + failures) # TODO: Make this a scrollable widget
+##            # Display warning about unsent emails
+##            if failure_lst: 
+##                failures = ', '.join(failure_lst) + '.'
+##                    
+##                messagebox.showinfo("Warning", "The following recipients "
+##                                    + "could no receive your message:\n "
+##                                    + failures) # TODO: Make this a scrollable widget
 
             mail_final_report(user, server, msg, success_lst, failure_lst)
             

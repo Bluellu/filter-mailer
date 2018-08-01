@@ -18,6 +18,7 @@ class StatusHandler:
         self.root = parent
         self.iters = num_iters
         self.curr_iter = 0
+        self.cancellation_status = False
         
         self.frame = tk.Toplevel(self.root, bd = 15) 
         self.frame.wm_title("Sending Emails: Status")
@@ -29,10 +30,29 @@ class StatusHandler:
         self.frame.grab_set()
         
         self.text = subj_lbl = tk.Label(self.frame, text = "Beginning....")
-        self.text.grid(column = 0, row = 0, padx = 10, sticky = "w")
+
+        # Cancel button (to stop program)
+        cancel_bttn = tk.Button(self.frame, text = "Cancel", width = 10,
+                        fg = "white",
+                        bg = "navy",
+                        command = self.cancel)
+
+        self.text.grid(column = 0, row = 0, pady = 35)
+        cancel_bttn.grid(column = 0, row = 1)
+        self.frame.columnconfigure(0, minsize = 300)
 
         self.frame.update()
-        center_window(self.frame) 
+        center_window(self.frame)
+
+    def cancel(self):
+        self.cancellation_status = True
+
+    def cancelled(self):
+        return self.cancellation_status
+
+    def self_destruct(self):
+        self.root.grab_set()
+        self.frame.destroy()
 
     def updateMessage(self, recipient):
         self.curr_iter += 1
