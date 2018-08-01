@@ -230,7 +230,6 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients,
                     failure_lst = failure_lst + recipients_rest
                     stat_handler.self_destruct()
                     print(success_lst, failure_lst)
-                    #mail_final_report(user, server, msg, success_lst, failure_lst)
                     break
 
                 else:
@@ -258,14 +257,6 @@ def mail_all(subj, message, img_path, user, pw, server_addr, port, recipients,
 
                     except smtp.SMTPServerDisconnected:
                         messagebox.showinfo("Warning", "Server disconnected.")                    
-
-##            # Display warning about unsent emails
-##            if failure_lst: 
-##                failures = ', '.join(failure_lst) + '.'
-##                    
-##                messagebox.showinfo("Warning", "The following recipients "
-##                                    + "could no receive your message:\n "
-##                                    + failures) # TODO: Make this a scrollable widget
 
             mail_final_report(user, server, msg, success_lst, failure_lst)
             

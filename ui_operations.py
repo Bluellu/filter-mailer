@@ -39,7 +39,7 @@ class StatusHandler:
 
         self.text.grid(column = 0, row = 0, pady = 35)
         cancel_bttn.grid(column = 0, row = 1)
-        self.frame.columnconfigure(0, minsize = 300)
+        self.frame.columnconfigure(0, minsize = 250)
 
         self.frame.update()
         center_window(self.frame)
@@ -106,6 +106,9 @@ def create_list_wgt(app, txt_list, x, y):
     txt_widget = tkscrolled.ScrolledText(app, width = x, height = y)    
     for item in txt_list:
         txt_widget.insert(tk.END, item + '\n')
+
+    default_colour = app.cget('bg')
+    txt_widget.configure(bg = default_colour, state = tk.DISABLED)
         
     return txt_widget
     
@@ -183,6 +186,8 @@ def email_creation(app):
     # Sender box
     recip_lbl = tk.Label(ec, text = "Recipients", bg = "light blue")
     recip_box = create_list_wgt(ec, recipients, 20, 15)
+    #default_colour = ec.cget('bg')
+    #recip_box.configure(bg = default_colour, state = tk.DISABLED)
     
     # Add items to grid
     recip_lbl.grid(column = 2, row = 0, sticky = "nsew")
@@ -193,7 +198,7 @@ def email_creation(app):
 
     msg_lbl.grid(column = 0, row = 2, columnspan = 2, padx = 10, sticky = "w")
     msg_box.grid(column = 0, row = 3, columnspan = 2, padx = 10, sticky = "nsew")
-
+    
     img_path.grid(column = 1, row = 4, columnspan = 3, sticky = "w")
     img_bttn.grid(column = 0, row = 4, padx = 10, pady = 10, sticky = "w")
     
